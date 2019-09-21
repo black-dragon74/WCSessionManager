@@ -92,7 +92,7 @@ extension WCSessionManager: WCSessionDelegate {
 // MARK: Interactive Messaging
 extension WCSessionManager {
     
-    // 12: Live messaging, sesssion should be valid and reachable on both platforms
+    // Live messaging, sesssion should be valid and reachable on both platforms
     private var validReachableSession: WCSession? {
         if let session = validSession, session.isReachable {
             return session
