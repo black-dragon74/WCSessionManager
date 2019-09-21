@@ -62,8 +62,6 @@ class WCSessionManager: NSObject {
         session?.delegate = self
         session?.activate()
     }
-    
-
 }
 
 // MARK: WCSessionDelegate
