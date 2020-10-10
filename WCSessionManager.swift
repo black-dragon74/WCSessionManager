@@ -14,14 +14,10 @@ import WatchConnectivity
 // To remove redundancy
 typealias MessageReceived = (session: WCSession, message: [String : Any], replyHandler: (([String : Any]) -> Void)?)
 
-// Protocol to manage all watchOS delegations
-protocol WatchOSDelegate: AnyObject {
-    func messageReceived(tuple: MessageReceived)
-}
-
 // Protocol to manage all iOS delegations
-protocol iOSDelegate: AnyObject {
+protocol ReceiverDelegate: AnyObject {
     func messageReceived(tuple: MessageReceived)
+    func activationComplete()
 }
 
 class WCSessionManager: NSObject {
@@ -35,8 +31,7 @@ class WCSessionManager: NSObject {
     }
     
     // Delegates for each platform
-    weak var watchOSDelegate: WatchOSDelegate?
-    weak var iOSDelegate: iOSDelegate?
+    weak var delegate: ReceiverDelegate?
 
     // WC Default session if supported else nil
     fileprivate let session: WCSession? = WCSession.isSupported() ? WCSession.default : nil
@@ -69,6 +64,7 @@ extension WCSessionManager: WCSessionDelegate {
     
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         print("activationDidCompleteWith activationState:\(activationState) error:\(String(describing: error))")
+        delegate?.activationComplete()
     }
     
     #if os(iOS)
@@ -119,15 +115,12 @@ extension WCSessionManager {
     func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
         handleSession(session, didReceiveMessage: message, replyHandler: replyHandler)
     }
+    
     // End Receivers
     
     // Helper Method to handle receiving messages based on platform
     func handleSession(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: (([String : Any]) -> Void)? = nil) {
-        #if os(iOS)
-        iOSDelegate?.messageReceived(tuple: (session, message, replyHandler))
-        #elseif os(watchOS)
-        watchOSDelegate?.messageReceived(tuple: (session, message, replyHandler))
-        #endif
+        delegate?.messageReceived(tuple: (session, message, replyHandler))
     }
 }
 
